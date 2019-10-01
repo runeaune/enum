@@ -134,6 +134,7 @@ func (ep *Parser) findConstDeclaration(fset *token.FileSet, f *ast.File) *ast.Ge
 }
 
 func (ep *Parser) findEnum(cd *ast.GenDecl) {
+	iotaValue := 0
 	for _, spec := range cd.Specs {
 		vspec, ok := spec.(*ast.ValueSpec)
 		if !ok {
@@ -144,6 +145,16 @@ func (ep *Parser) findEnum(cd *ast.GenDecl) {
 			item, ok := n.Obj.Decl.(*ast.ValueSpec)
 			if !ok {
 				continue
+			}
+
+			// Add non first iota item to enums.
+			if item.Type == nil && iotaValue != 0 {
+				ep.Enums = append(ep.Enums, Enum{
+					String: ep.formatString(n.Name),
+					Int:    iotaValue,
+					Name:   n.Name,
+				})
+				iotaValue++
 			}
 
 			typIdent, ok := item.Type.(*ast.Ident)
@@ -163,6 +174,17 @@ func (ep *Parser) findEnum(cd *ast.GenDecl) {
 				continue
 			}
 
+			// Add first iota item to enums.
+			if ident, ok := item.Values[0].(*ast.Ident); ok && ident.Name == "iota" {
+				ep.Enums = append(ep.Enums, Enum{
+					String: ep.formatString(n.Name),
+					Int:    iotaValue,
+					Name:   n.Name,
+				})
+				iotaValue++
+				continue
+			}
+
 			basicLit, ok := item.Values[0].(*ast.BasicLit)
 			if !ok {
 				continue
@@ -173,14 +195,16 @@ func (ep *Parser) findEnum(cd *ast.GenDecl) {
 				continue
 			}
 
-			stringName := strings.TrimPrefix(n.Name, ep.TrimPrefix)
-			stringName = ep.Format(stringName)
-
 			ep.Enums = append(ep.Enums, Enum{
-				String: stringName,
+				String: ep.formatString(n.Name),
 				Int:    value,
 				Name:   n.Name,
 			})
 		}
 	}
+}
+
+func (ep *Parser) formatString(s string) string {
+	s = strings.TrimPrefix(s, ep.TrimPrefix)
+	return ep.Format(s)
 }
