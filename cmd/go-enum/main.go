@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/alecthomas/kingpin"
 	"github.com/bombsimon/enum"
@@ -14,7 +15,7 @@ func main() {
 		fileName   = kingpin.Arg("input-file", "Uses $GOFILE if that is set.").Envar("GOFILE").Required().ExistingFile()
 		lineNum    = kingpin.Flag("line", "Location of const statement to generate enum from. Uses $GOLINE if that is set.").Default("1").Envar("GOLINE").Int()
 		trimPrefix = kingpin.Flag("trim", "Prefix to trim from the enum type name when generating the strings.").Default("").String()
-		formatFunc = kingpin.Flag("format", "snake|camel").Default("snake").Enum("snake", "camel")
+		formatFunc = kingpin.Flag("format", "snake|camel|upper|lower").Default("snake").Enum("snake", "camel", "upper", "lower")
 		json       = kingpin.Flag("json", "Generate code implementing (un)marshal interface").Default("true").Bool()
 	)
 
@@ -23,6 +24,8 @@ func main() {
 	formatFuncs := map[string]func(s string) string{
 		"snake": strcase.ToSnake,
 		"camel": strcase.ToLowerCamel,
+		"upper": strings.ToUpper,
+		"lower": strings.ToLower,
 	}
 
 	e := enum.New(*fileName, *trimPrefix, *lineNum, *json, formatFuncs[*formatFunc])
