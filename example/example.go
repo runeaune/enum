@@ -7,3 +7,11 @@ const (
 	PostUpdate PostType = 4
 	PostDelete PostType = 8
 )
+
+//go:generate go-enum --trim "Direction" --format upper
+const (
+	DirectionUp DirectionType = iota
+	DirectionDown
+	DirectionLeft
+	DirectionRight
+)

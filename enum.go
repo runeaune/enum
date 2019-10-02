@@ -133,8 +133,26 @@ func (ep *Parser) findConstDeclaration(fset *token.FileSet, f *ast.File) *ast.Ge
 	return nil
 }
 
+// nolint: funclen
 func (ep *Parser) findEnum(cd *ast.GenDecl) {
-	iotaValue := 0
+	var (
+		iotaValue = 0
+		addEnum   = func(name string, value interface{}) {
+			v, ok := value.(int)
+			if !ok {
+				return
+			}
+
+			ep.Enums = append(ep.Enums, Enum{
+				String: ep.Format(
+					strings.TrimPrefix(name, ep.TrimPrefix),
+				),
+				Int:  v,
+				Name: name,
+			})
+		}
+	)
+
 	for _, spec := range cd.Specs {
 		vspec, ok := spec.(*ast.ValueSpec)
 		if !ok {
@@ -149,11 +167,7 @@ func (ep *Parser) findEnum(cd *ast.GenDecl) {
 
 			// Add non first iota item to enums.
 			if item.Type == nil && iotaValue != 0 {
-				ep.Enums = append(ep.Enums, Enum{
-					String: ep.formatString(n.Name),
-					Int:    iotaValue,
-					Name:   n.Name,
-				})
+				addEnum(n.Name, iotaValue)
 				iotaValue++
 			}
 
@@ -174,37 +188,27 @@ func (ep *Parser) findEnum(cd *ast.GenDecl) {
 				continue
 			}
 
-			// Add first iota item to enums.
-			if ident, ok := item.Values[0].(*ast.Ident); ok && ident.Name == "iota" {
-				ep.Enums = append(ep.Enums, Enum{
-					String: ep.formatString(n.Name),
-					Int:    iotaValue,
-					Name:   n.Name,
-				})
-				iotaValue++
+			var (
+				value interface{}
+				err   error
+			)
+
+			switch v := item.Values[0].(type) {
+			case *ast.BasicLit:
+				value, err = strconv.Atoi(v.Value)
+				if err != nil {
+					continue
+				}
+			case *ast.Ident:
+				if v.Name == "iota" {
+					value = iotaValue
+					iotaValue++
+				}
+			default:
 				continue
 			}
 
-			basicLit, ok := item.Values[0].(*ast.BasicLit)
-			if !ok {
-				continue
-			}
-
-			value, err := strconv.Atoi(basicLit.Value)
-			if err != nil {
-				continue
-			}
-
-			ep.Enums = append(ep.Enums, Enum{
-				String: ep.formatString(n.Name),
-				Int:    value,
-				Name:   n.Name,
-			})
+			addEnum(n.Name, value)
 		}
 	}
-}
-
-func (ep *Parser) formatString(s string) string {
-	s = strings.TrimPrefix(s, ep.TrimPrefix)
-	return ep.Format(s)
 }
