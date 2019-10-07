@@ -65,8 +65,8 @@ func (v PostType) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON unmarshalls the JSON to it's PostType enum.
 func (v *PostType) UnmarshalJSON(b []byte) error {
 	var s string
-	err := json.Unmarshal(b, &s)
-	if err != nil {
+
+	if err := json.Unmarshal(b, &s); err != nil {
 		return err
 	}
 

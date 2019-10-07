@@ -65,8 +65,8 @@ func (v DirectionType) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON unmarshalls the JSON to it's DirectionType enum.
 func (v *DirectionType) UnmarshalJSON(b []byte) error {
 	var s string
-	err := json.Unmarshal(b, &s)
-	if err != nil {
+
+	if err := json.Unmarshal(b, &s); err != nil {
 		return err
 	}
 

@@ -56,8 +56,8 @@ func (v {{.TypeName}}) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON unmarshalls the JSON to it's {{.TypeName}} enum.
 func (v *{{.TypeName}}) UnmarshalJSON(b []byte) error {
 	var s string
-	err := json.Unmarshal(b, &s)
-	if err != nil {
+
+	if err := json.Unmarshal(b, &s); err != nil {
 		return err
 	}
 
