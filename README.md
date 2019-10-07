@@ -14,12 +14,24 @@ const (
 )
 ```
 
+If you just want an enum and don't care about the value, use Go's `iota`.
+
+```go
+//go:generate go-enum --trim "Direction" --format upper
+const (
+    DirectionUp Direction = iota
+    DirectionDown
+    DirectionLeft
+    DirectionRight
+)
+```
+
 See the [example](example/) folder for example generated code.
 
 ## Installation
 
 ```
-go get -u https://github.com/bombsimon/enum/...
+go get -u github.com/bombsimon/enum/...
 ```
 
 ## Interfaces
@@ -31,3 +43,11 @@ The current interfaces that will be implemented are
 * `Valid` - Returns true or false if the enum is valid
 * `MarshalJSON` - JSON marshal interface
 * `UnmarshalJSON` - JSON unmarshal interface
+
+## Flags
+
+The following flags can be used.
+
+* `json` - Don't generate JSON interface by setting to false
+* `format` - The way to format the constant. `snake|camel|upper|lower`
+* `trim` - What part of the constant to trim.
