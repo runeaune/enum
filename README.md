@@ -26,7 +26,9 @@ const (
 )
 ```
 
-See the [example](example/) folder for example generated code.
+See the [example](example/) folder for example generated code. There you'll also
+find information about how to create string enums and accept both their string
+representation and the actual value.
 
 ## Installation
 
@@ -40,6 +42,7 @@ The current interfaces that will be implemented are
 
 * `FromString` - Convert a string to the enum type
 * `String` - Get the string value for the enum
+* `Value` - Get the actual value of the enum
 * `Valid` - Returns true or false if the enum is valid
 * `MarshalJSON` - JSON marshal interface
 * `UnmarshalJSON` - JSON unmarshal interface
@@ -49,5 +52,25 @@ The current interfaces that will be implemented are
 The following flags can be used.
 
 * `json` - Don't generate JSON interface by setting to false
-* `format` - The way to format the constant. `snake|camel|upper|lower`
+* `value` - Set to true to generate `Value()` and allow `FromString()` to accept
+  the enums actual value as well
+* `format` - The way to format the constant.
 * `trim` - What part of the constant to trim.
+
+## Format functions
+
+The string representation of the enum can beformatted in multiple ways. The
+value will be the name of the constant mins the part that's been trimmed off by
+setting `--trim`. Below are examples assuming `--trim` is set to `Prefix`.
+
+| Method                | Flag name        | Constant                | `String()` value            |
+| --------------------- | ---------------- | ----------------------- | --------------------------- |
+| Snake case            | snake            | `PrefixThisString`      | `this_string`               |
+| Camel case            | camel            | `PrefixSomeValue`       | `SomeValue`                 |
+| Upper                 | upper            | `PrefixMyValue`         | `MYVALUE`                   |
+| Lower                 | lower            | `PrefixMoreConstants`   | `moreconstants`             |
+| First letter          | first            | `PrefixJustFirstLetter` | `J` (will preserve casing)  |
+| First letter upper    | first-upper      | `PrefixSomeValue`       | `S` (will convert to upper) |
+| First letter lower    | first-lower      | `PrefixANotherValue`    | `a` (will convert to lower) |
+| Capitalize first word | capitalize-first | `PrefixThisIsWords`     | `This is words`             |
+| Capitalzie all words  | capitalize-all   | `PrefixThisIsAlsoWords` | `This Is Also Words`        |

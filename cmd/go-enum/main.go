@@ -3,11 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/alecthomas/kingpin"
 	"github.com/bombsimon/enum"
-	"github.com/iancoleman/strcase"
 )
 
 func main() {
@@ -15,19 +13,14 @@ func main() {
 		fileName   = kingpin.Arg("input-file", "Uses $GOFILE if that is set.").Envar("GOFILE").Required().ExistingFile()
 		lineNum    = kingpin.Flag("line", "Location of const statement to generate enum from. Uses $GOLINE if that is set.").Default("1").Envar("GOLINE").Int()
 		trimPrefix = kingpin.Flag("trim", "Prefix to trim from the enum type name when generating the strings.").Default("").String()
-		formatFunc = kingpin.Flag("format", "snake|camel|upper|lower").Default("snake").Enum("snake", "camel", "upper", "lower")
+		formatFunc = kingpin.Flag("format", "How to format string value").Default("snake").Enum("snake", "camel", "upper", "lower", "first", "first-upper", "first-lower", "capitalize-first", "capitalize-all")
 		json       = kingpin.Flag("json", "Generate code implementing (un)marshal interface").Default("true").Bool()
 		value      = kingpin.Flag("with-value", "Generate code implementing Value() to allow the actual value").Default("false").Bool()
 	)
 
 	kingpin.Parse()
 
-	formatFuncs := map[string]func(s string) string{
-		"snake": strcase.ToSnake,
-		"camel": strcase.ToLowerCamel,
-		"upper": strings.ToUpper,
-		"lower": strings.ToLower,
-	}
+	formatFuncs := enum.FormatFuncs()
 
 	e := enum.New(*fileName, *trimPrefix, *lineNum, *json, *value, formatFuncs[*formatFunc])
 
