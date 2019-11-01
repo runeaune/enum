@@ -10,13 +10,13 @@ import (
 )
 
 // {{.TypeName}} is an Enum.
-type {{.TypeName}} int
+type {{.TypeName}} {{.ValueType}}
 
 // {{.TypeName}}FromString returns a {{.TypeName}} from it's string representation.
 func {{.TypeName}}FromString(s string) ({{.TypeName}}, error) {
 	switch s {
 	{{ range $e := .Enums -}}
-	case {{$e.Name}}.String():
+	case {{$e.Name}}.String(){{ if and ($.WithValue) (eq $.ValueType "string") }},{{$e.Name}}.Value(){{ end }}:
 		return {{$e.Name}}, nil
 	{{ end -}}
 	default:
@@ -34,6 +34,20 @@ func (v {{.TypeName}}) String() string {
 		return ""
 	}
 }
+
+{{ if .WithValue }}
+// Value returns the actual value for the enum type.
+func (v {{.TypeName}}) Value() {{ .ValueType }} {
+    switch v {
+	{{ range $e := .Enums -}}
+	case {{$e.Name}}:
+		return {{ if eq $.ValueType "string" }}"{{$e.Value}}"{{ else }}{{$e.Int}}{{ end }}
+	{{ end -}}
+	default:
+		return {{ if eq $.ValueType "string" }}""{{ else }}-1{{ end }}
+	}
+}
+{{ end }}
 
 // Valid returns false if the {{.TypeName}} isn't valid.
 func (v {{.TypeName}}) Valid() bool {

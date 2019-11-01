@@ -17,6 +17,7 @@ func main() {
 		trimPrefix = kingpin.Flag("trim", "Prefix to trim from the enum type name when generating the strings.").Default("").String()
 		formatFunc = kingpin.Flag("format", "snake|camel|upper|lower").Default("snake").Enum("snake", "camel", "upper", "lower")
 		json       = kingpin.Flag("json", "Generate code implementing (un)marshal interface").Default("true").Bool()
+		value      = kingpin.Flag("with-value", "Generate code implementing Value() to allow the actual value").Default("false").Bool()
 	)
 
 	kingpin.Parse()
@@ -28,9 +29,9 @@ func main() {
 		"lower": strings.ToLower,
 	}
 
-	e := enum.New(*fileName, *trimPrefix, *lineNum, *json, formatFuncs[*formatFunc])
+	e := enum.New(*fileName, *trimPrefix, *lineNum, *json, *value, formatFuncs[*formatFunc])
 
-	if err := e.GetEnum(); err != nil {
+	if err := e.GetEnumFromFile(); err != nil {
 		fmt.Printf("Could not get enums: %s\n", err.Error())
 		os.Exit(1)
 	}

@@ -30,36 +30,45 @@ type Parser struct {
 	Package    string
 	TrimPrefix string
 	TypeName   string
+	ValueType  string
 	WithJSON   bool
+	WithValue  bool
 }
 
 // Enum is one enum with a number mapped to a string. The name of the enun will
 // be the constant value.
 type Enum struct {
 	Int    int
+	Value  string
 	Name   string
 	String string
 }
 
 // New will create a new parser to use for a given file.
-func New(file, trimPrefix string, lineStart int, json bool, ff FormatFunc) *Parser {
+func New(file, trimPrefix string, lineStart int, json, value bool, ff FormatFunc) *Parser {
 	return &Parser{
 		File:       file,
+		Format:     ff,
 		LineStart:  lineStart,
 		TrimPrefix: trimPrefix,
 		WithJSON:   json,
-		Format:     ff,
+		WithValue:  value,
 	}
 }
 
-// GetEnum will find all enum in one const block starting from the parsers
-// LineStart.
-func (ep *Parser) GetEnum() error {
+// GetEnumFromFile will read a file and pass the content to GetEnum()
+func (ep *Parser) GetEnumFromFile() error {
 	fileData, err := ioutil.ReadFile(ep.File)
 	if err != nil {
 		return err
 	}
 
+	return ep.GetEnum(fileData)
+}
+
+// GetEnum will find all enum in one const block starting from the parsers
+// LineStart.
+func (ep *Parser) GetEnum(fileData []byte) error {
 	fset := token.NewFileSet()
 
 	file, err := parser.ParseFile(fset, "", fileData, parser.ParseComments)
@@ -138,18 +147,24 @@ func (ep *Parser) findEnum(cd *ast.GenDecl) {
 	var (
 		iotaValue = 0
 		addEnum   = func(name string, value interface{}) {
-			v, ok := value.(int)
-			if !ok {
-				return
-			}
-
-			ep.Enums = append(ep.Enums, Enum{
+			enum := Enum{
 				String: ep.Format(
 					strings.TrimPrefix(name, ep.TrimPrefix),
 				),
-				Int:  v,
 				Name: name,
-			})
+			}
+
+			if i, ok := value.(int); ok {
+				enum.Int = i
+				ep.ValueType = "int"
+			}
+
+			if v, ok := value.(string); ok {
+				enum.Value = v
+				ep.ValueType = "string"
+			}
+
+			ep.Enums = append(ep.Enums, enum)
 		}
 	)
 
@@ -195,8 +210,15 @@ func (ep *Parser) findEnum(cd *ast.GenDecl) {
 
 			switch v := item.Values[0].(type) {
 			case *ast.BasicLit:
-				value, err = strconv.Atoi(v.Value)
-				if err != nil {
+				switch v.Kind {
+				case token.STRING:
+					value = strings.Trim(v.Value, "\"")
+				case token.INT:
+					value, err = strconv.Atoi(v.Value)
+					if err != nil {
+						continue
+					}
+				default:
 					continue
 				}
 			case *ast.Ident:
