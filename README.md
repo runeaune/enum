@@ -26,9 +26,44 @@ const (
 )
 ```
 
-See the [example](example/) folder for example generated code. There you'll also
-find information about how to create string enums and accept both their string
-representation and the actual value.
+If you want to use the actual constant and it's value but treat it as an enum to
+support validation and conversion from a fixed type, set the value to a string.
+The `Stringer()` interface will be implemented just like other enums but by
+adding `--with-value` you implement `Value()` which returns the constants actual
+value.
+
+```go
+//go:generate go-enum --trim "Answer" --format capitalize-first --no-json --with-value
+const (
+	AnswerYes   YesOrNo = "Y"
+	AnswerNo    YesOrNo = "N"
+	AnswerMaybe YesOrNo = "M"
+)
+```
+
+You can now create types from either the constant value or the trimmed constant
+name and also validate the type if created manually. If the constnat value is
+needed, e.g. while storing you can use `Value()` but for printing `String()`
+will return the full name.
+
+```go
+func main() {
+	var (
+		y, _ = YesOrNoFromString("Y")     // AnswerYes
+		m, _ = YesOrNoFromString("Maybe") // AnswerMaybe
+		bad  = YesOrNo("Bad")
+	)
+
+	fmt.Println(y.String())   // Yes
+	fmt.Println(m.Value())    // M
+	fmt.Println(m.Valid())    // True
+	fmt.Println(bad.Valid())  // False
+	fmt.Println(bad.String()) // ""
+	fmt.Println(bad.Value())  // ""
+}
+```
+
+See the [example](example/) folder for example generated code. 
 
 ## Installation
 
@@ -71,6 +106,6 @@ setting `--trim`. Below are examples assuming `--trim` is set to `Prefix`.
 | Lower                 | lower            | `PrefixMoreConstants`   | `moreconstants`             |
 | First letter          | first            | `PrefixJustFirstLetter` | `J` (will preserve casing)  |
 | First letter upper    | first-upper      | `PrefixSomeValue`       | `S` (will convert to upper) |
-| First letter lower    | first-lower      | `PrefixANotherValue`    | `a` (will convert to lower) |
+| First letter lower    | first-lower      | `PrefixAnotherValue`    | `a` (will convert to lower) |
 | Capitalize first word | capitalize-first | `PrefixThisIsWords`     | `This is words`             |
 | Capitalzie all words  | capitalize-all   | `PrefixThisIsAlsoWords` | `This Is Also Words`        |

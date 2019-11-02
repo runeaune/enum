@@ -26,11 +26,11 @@ func YesOrNoFromString(s string) (YesOrNo, error) {
 func (v YesOrNo) String() string {
 	switch v {
 	case AnswerYes:
-		return "YES"
+		return "Yes"
 	case AnswerNo:
-		return "NO"
+		return "No"
 	case AnswerMaybe:
-		return "MAYBE"
+		return "Maybe"
 	default:
 		return ""
 	}

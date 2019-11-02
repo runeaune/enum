@@ -16,7 +16,7 @@ const (
 	DirectionRight
 )
 
-//go:generate go-enum --trim "Answer" --format upper --no-json --with-value
+//go:generate go-enum --trim "Answer" --format capitalize-first --no-json --with-value
 const (
 	AnswerYes   YesOrNo = "Y"
 	AnswerNo    YesOrNo = "N"
