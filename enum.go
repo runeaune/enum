@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/iancoleman/strcase"
 )
@@ -23,16 +24,17 @@ type FormatFunc func(string) string
 // Parser is the parser that will search a file for constants and add each
 // constant as an enum.
 type Parser struct {
-	Enums      []Enum
-	File       string
-	Format     FormatFunc
-	LineStart  int
-	Package    string
-	TrimPrefix string
-	TypeName   string
-	ValueType  string
-	WithJSON   bool
-	WithValue  bool
+	Enums       []Enum
+	File        string
+	Format      FormatFunc
+	LineStart   int
+	Package     string
+	TrimPrefix  string
+	TypeName    string
+	ValueType   string
+	WithJSON    bool
+	WithValue   bool
+	GeneratedAt string
 }
 
 // Enum is one enum with a number mapped to a string. The name of the enun will
@@ -96,6 +98,7 @@ func (ep *Parser) GetEnum(fileData []byte) error {
 func (ep *Parser) CreateFile() error {
 	tmpl := template.Must(template.New("").Parse(enumTemplate))
 	buf := bytes.Buffer{}
+	ep.GeneratedAt = time.Now().Format(time.RFC3339)
 
 	if err := tmpl.Execute(&buf, ep); err != nil {
 		return err
