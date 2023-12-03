@@ -21,6 +21,12 @@ func TestFormatFuncs(t *testing.T) {
 			expected:    "something_cool",
 		},
 		{
+			description: "space",
+			funcName:    "space",
+			input:       "SomethingCool",
+			expected:    "something cool",
+		},
+		{
 			description: "camel",
 			funcName:    "camel",
 			input:       "something_cool",

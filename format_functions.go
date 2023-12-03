@@ -9,6 +9,7 @@ import (
 func FormatFuncs() map[string]func(s string) string {
 	return map[string]func(s string) string{
 		"snake":            strcase.ToSnake,
+		"space":            Space,
 		"camel":            strcase.ToLowerCamel,
 		"upper":            strings.ToUpper,
 		"lower":            strings.ToLower,
@@ -44,4 +45,9 @@ func CapitalizeAll(s string) string {
 	separated := strings.ReplaceAll(snakeForm, "_", " ")
 
 	return strings.Title(separated)
+}
+
+func Space(s string) string {
+	snakeForm := strcase.ToSnake(s)
+	return strings.ReplaceAll(snakeForm, "_", " ")
 }
