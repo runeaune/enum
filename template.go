@@ -22,7 +22,7 @@ func {{.TypeName}}FromString(s string) ({{.TypeName}}, error) {
 		return {{$e.Name}}, nil
 	{{ end -}}
 	default:
-		return {{.TypeName}}(-1), fmt.Errorf("unknown {{.TypeName}} %s", s)
+		return {{.TypeName}}({{ if eq $.ValueType "string" }}""{{ else }}-1{{ end }}), fmt.Errorf("unknown {{.TypeName}} %s", s)
 	}
 }
 

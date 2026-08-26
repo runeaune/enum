@@ -159,12 +159,16 @@ func (ep *Parser) findEnum(cd *ast.GenDecl) {
 
 			if i, ok := value.(int); ok {
 				enum.Int = i
-				ep.ValueType = "int"
+				if ep.ValueType == "" {
+					ep.ValueType = "int"
+				}
 			}
 
 			if v, ok := value.(string); ok {
 				enum.Value = v
-				ep.ValueType = "string"
+				if ep.ValueType == "" {
+					ep.ValueType = "string"
+				}
 			}
 
 			ep.Enums = append(ep.Enums, enum)

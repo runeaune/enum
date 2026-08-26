@@ -16,6 +16,7 @@ func main() {
 		formatFunc = kingpin.Flag("format", "How to format string value").Default("snake").Enum("space", "snake", "camel", "upper", "lower", "first", "first-upper", "first-lower", "capitalize-first", "capitalize-all")
 		json       = kingpin.Flag("json", "Generate code implementing (un)marshal interface").Default("true").Bool()
 		value      = kingpin.Flag("with-value", "Generate code implementing Value() to allow the actual value").Default("false").Bool()
+		typeOverride = kingpin.Flag("type", "Override the value type of the enum.").String()
 	)
 
 	kingpin.Parse()
@@ -23,6 +24,9 @@ func main() {
 	formatFuncs := enum.FormatFuncs()
 
 	e := enum.New(*fileName, *trimPrefix, *lineNum, *json, *value, formatFuncs[*formatFunc])
+	if *typeOverride != "" {
+		e.ValueType = *typeOverride
+	}
 
 	if err := e.GetEnumFromFile(); err != nil {
 		fmt.Printf("Could not get enums: %s\n", err.Error())
